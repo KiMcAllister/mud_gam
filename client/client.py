@@ -1,26 +1,54 @@
-import msvcrt
-import time
+import socket
+import select
+import errno
 import sys
 
-class TimeoutExpired(Exception):
-    pass
+header_len = 10
 
-def input_raw(prompt):
-    sys.stdout.write(prompt)
-    #sys.stdout.flush()
+print("Welcome to \"game name\" to get stated we need to connect you to your campaign")
 
-def input_with_timeout(prompt, timeout, timer=time.monotonic):
-    sys.stdout.write(prompt)
-    sys.stdout.flush()
-    endtime = timer() + timeout
-    result = []
-    while timer() < endtime:
-        if msvcrt.kbhit():
-            result.append(msvcrt.getwche()) #XXX can it block on multibyte characters?
-            #if result[-1] == '\r':
-            #    return ''.join(result[:-1])
-        time.sleep(0.04) # just to yield to other processes/threads
-    raise TimeoutExpired
-while True:
-    user_in = input_with_timeout("tell me: ",100)
-print(user_in)
+server_ip = input("What is your campaign ip?\n> ")
+server_port = int(input("What is your campaign port?\n> "))
+username = input("What do you want your username to be?\n> ")
+
+player_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+player_socket.connect((server_ip,server_port))
+player_socket.setblocking(False)
+
+username = username.encode()
+username_header = f"{len(username):<{header_len}}".encode()
+
+player_socket.send(username_header + username)
+
+def send_input(text):
+    text = f"{len(text):<{header_len}}".encode() + text.encode()
+    player_socket.send(text)
+
+def get_text():
+    try:
+        while True:
+            username_header = player_socket.recv(header_len)
+
+            if not len(username_header):
+                print('Connection closed by the server')
+                sys.exit()
+            username_length = int(username_header.decode())
+
+            username = player_socket.recv(username_length).decode()
+
+            message_header = player_socket.recv(header_len)
+            message_length = int(message_header.decode())
+            message = player_socket.recv(message_length).decode()
+            return (f'{username} > {message}')
+    except IOError as e:
+        # This is normal on non blocking connections - when there are no incoming data error is going to be raised
+        # Some operating systems will indicate that using AGAIN, and some using WOULDBLOCK error code
+        # We are going to check for both - if one of them - that's expected, means no incoming data, continue as normal
+        # If we got different error code - something happened
+        if e.errno != errno.EAGAIN and e.errno != errno.EWOULDBLOCK:
+            print('Reading error1: {}'.format(str(e)))
+            sys.exit()
+    except Exception as e:
+        # Any other exception - something happened, exit
+        print('Reading error: {}'.format(str(e)))
+        sys.exit()
