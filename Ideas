@@ -1,5 +1,27 @@
 #Add ideas here. If you feel like ideas all fit in a category we can break it up by categories
 
+#Core_Mechanics
+   #World_Interaction
+      #When items are picked up, send to an inventory code
+   #Inventory
+      #Store inventory items by name, quantity and player
+      
+#Demo
+   #Design a demo world for testing purposes.
+      #Multiplayer
+         #Player1 spawn downstairs
+         #Player2+ spawn upstairs in different bedrooms
+      #Items
+         #Locked door
+         #Table with set items
+         #Upstairs
+            #Multiple bedrooms and a window
+               #Player comments about window when prompted
+         #Chair
+            #Player comments about chair when prompted
+         #Lamp
+            #Turn on and off
+
 #Combat
    #Skills
    #Attacks
@@ -16,5 +38,3 @@
    #PvP
    #PvE
    #P_to_P_Interaction
-#I am adding this in a seperate branch
-#So my prediction was only mostly wrong, as branches are similar to what I expected.
