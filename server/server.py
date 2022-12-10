@@ -7,8 +7,9 @@ print("Welcome to our server app, if you answer a few questions we will have you
 
 header_len = 10
 server_ip = "0.0.0.0"
+host_ip = socket.gethostbyname(socket.gethostname())
 server_port = int(input("What port would you like host your server on? (i.e. 5555)\n> "))
-
+print(f"Your server has been hosted!\nIP: {host_ip}\nPort: {server_port}")
 server_connection = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 server_connection.bind((server_ip, server_port))
 server_connection.listen()
